@@ -51,7 +51,7 @@ class App extends Component {
     );
   };
 
-  onSelectAnswer = (questionNo: number, answer: "yes" | "no") => {
+  onSelectAnswer = (questionNo: number, answer: ANSWER) => {
     const answerSet = new Map(this.state.answerSet);
     answerSet.set(questionNo, answer);
     this.setState({
