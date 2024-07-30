@@ -3,9 +3,15 @@ import { QUESTIONS } from "./questions";
 
 type ANSWER = "yes" | "no";
 
-class App extends Component {
-  state = {
+interface AppState {
+  answerSet: any;
+  score: number | undefined;
+}
+
+class App extends Component<{}, AppState> {
+  state: AppState = {
     answerSet: new Map<number, ANSWER>(),
+    score: undefined,
   };
 
   showQuestions = () => {
@@ -59,12 +65,29 @@ class App extends Component {
     });
   };
 
+  calculateScore = () => {
+    let noOfYes = 0;
+    for (const value of this.state.answerSet.values()) {
+      if (value === "yes") noOfYes += 1;
+    }
+    this.setState({
+      score: (100 * noOfYes) / Object.keys(QUESTIONS).length,
+    });
+  };
+
   render() {
     return (
       <div className="main__wrap">
         <main className="container">
           <div>TODO</div>
           {this.showQuestions()}
+          <button
+            disabled={this.state.answerSet.size < 5}
+            onClick={this.calculateScore}
+          >
+            Calculate
+          </button>
+          {this.state.score && <div>Score: {this.state.score}</div>}
         </main>
       </div>
     );
