@@ -6,13 +6,20 @@ type ANSWER = "yes" | "no";
 interface AppState {
   answerSet: any;
   score: number | undefined;
+  average: number | undefined;
 }
 
-class App extends Component<{}, AppState> {
-  state: AppState = {
+class App extends Component<{}, Partial<AppState>> {
+  state: Partial<AppState> = {
     answerSet: new Map<number, ANSWER>(),
     score: undefined,
   };
+
+  componentDidMount(): void {
+    this.setState({
+      average: this.getAverage(),
+    });
+  }
 
   showQuestions = () => {
     let questionsView: ReactElement[] = [];
@@ -70,11 +77,41 @@ class App extends Component<{}, AppState> {
     for (const value of this.state.answerSet.values()) {
       if (value === "yes") noOfYes += 1;
     }
+    const score = (100 * noOfYes) / Object.keys(QUESTIONS).length;
+    let noOfRuns = 1;
+    let totalScores = score;
+    if (sessionStorage.getItem("averageScoreDetails") !== null) {
+      const averageScoreInfo = JSON.parse(
+        sessionStorage.getItem("averageScoreDetails") as string
+      );
+      noOfRuns += averageScoreInfo.noOfRuns;
+      totalScores += averageScoreInfo.average;
+    }
+    sessionStorage.setItem(
+      "averageScoreDetails",
+      JSON.stringify({
+        noOfRuns,
+        average: totalScores / noOfRuns,
+      })
+    );
+
     this.setState({
-      score: (100 * noOfYes) / Object.keys(QUESTIONS).length,
+      score,
+      average: totalScores / noOfRuns,
     });
   };
 
+  getAverage = () => {
+    let average = undefined;
+    console.log(sessionStorage.getItem("averageScoreDetails"));
+    if (sessionStorage.getItem("averageScoreDetails") !== null) {
+      let temp = JSON.parse(
+        sessionStorage.getItem("averageScoreDetails") as string
+      );
+      average = temp.average;
+    }
+    return average;
+  };
   render() {
     return (
       <div className="main__wrap">
@@ -88,6 +125,7 @@ class App extends Component<{}, AppState> {
             Calculate
           </button>
           {this.state.score && <div>Score: {this.state.score}</div>}
+          {this.state.average && <div>Average: {this.state.average}</div>}
         </main>
       </div>
     );
